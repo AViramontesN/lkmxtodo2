@@ -1,58 +1,184 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+<div class="wrapper">
+<h1>LKMX Front-End</h1>
+  <div class="todo-container">
+    <h2>To Do List</h2>
+    <div class="todo-input-wrapper">
+      <input type="text" class="todo-input" v-model="newTodo" @keyup.enter="addTodo">
+      <button @click="addTodo" class="todo-input-button">Agregar</button>
+    </div>
+  <div class="list-wrapper">
+    <div>
+      <p :key="firstTodo" class="todo-item-label" :class="{'hidden' : !firstTodo}">Todavía no has agregado nada</p>
+    </div>
+
+    <div v-for="(todo, index) in todos" :key='todo.id' class="todo-item">
+      <div class="todo-item-left">
+          <div v-if="!todo.editable" class="todo-item-label"><li>{{ todo.title }}</li>
+            <div class="remove-item">
+              <img src="../assets/icon-trash.svg" @click="removeTodo(index)">
+              <img src="../assets/icon-pen.svg" @click="editTodo(todo)">
+            </div>
+        </div>
+      <div v-else class="todo-item-edit">
+        <input type="text" v-model="todo.title" @blur="doneEdit(todo)" @keyup.enter="doneEdit(todo)" @keyup.escape="cancelEdit(todo)" v-focus>
+        <img src="../assets/icon-disk.svg" @click="editTodo(todo)">
+      </div>
+        </div>
+    </div>
   </div>
+  </div>
+</div>
 </template>
 
 <script>
 export default {
   name: 'HelloWorld',
-  props: {
-    msg: String
+  data (){
+    return {
+      newTodo: '',
+      idForTodo: null,
+      beforeEditCache: '',
+      firstTodo: true,
+      todos: [
+      ]
+    }
+    
+  },
+  directives:{
+    focus:{
+      inserted: function(el){
+        el.focus()
+      }
+    }
+  },
+  methods: {
+    addTodo() {
+      if(this.newTodo.trim().length == 0){
+        return
+      }
+      this.firstTodo = false
+      this.todos.push(
+        {
+          id: this.idForTodo,
+          title: this.newTodo,
+          completed: false,
+          editable: false,
+        }),
+        this.newTodo = ''
+        this.idForTodo++
+    },
+    removeTodo(index){
+      this.todos.splice(index, 1)
+    },
+    editTodo(todo){
+      this.beforeEditCache = todo.title
+      todo.editable = true
+    },
+    cancelEdit(todo){
+      todo.title = this.beforeEditCache
+      todo.editing = false
+    },
+    doneEdit(todo){
+      if(todo.title.trim().length == 0){
+        todo.title = this.beforeEditCache
+      }
+      todo.editable = false
+    }
   }
 }
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
+h1{
+  text-align: left;
+  font-size: 48px;
+  margin-bottom: 25px;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+h2{
+  text-align: left;
+  font-size: 40px;
+  margin-bottom: 12.5px;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
+p{
+  font-size: 18px;
+  font-weight: 500;
 }
-a {
-  color: #42b983;
+li{
+  font-size: 18px;
+  font-weight: 500;
 }
+.todo-container{
+  padding: 8px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #fff;
+  box-shadow: 0px 2px 4px rgb(0 0 0 / 8%), 0px 0px 2px rgb(0 0 0 / 8%);
+  border-radius: 8px;
+  margin-left: 10px;
+}
+.wrapper{
+  width: 500px;
+  margin: 0 auto;
+}
+.todo-input-wrapper{
+  display: flex;
+  margin: 8px 0px;
+}
+.todo-input-button{
+  padding: 9px;
+  background-color: #424df7;
+  color:white;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+.todo-input{
+  padding: 8px;
+  border-radius: 8px;
+  width: 100%;
+  margin-right:8px;
+}
+.todo-item-label{
+  justify-content: space-between;
+  display: flex;
+  flex-direction: row;
+  margin: 3px;
+  padding: 4px;
+  align-items: center;
+}
+img{
+  padding: 4px;
+  background-color:white;
+  margin: 0px 2px;
+  border: #706f6f 1px solid;
+  border-radius: 8px;
+}
+.todo-item-edit{
+  margin: 3px;
+  padding: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+.todo-item-edit input{
+  width:100%;
+
+}
+.list-wrapper{
+  background-color: #d3d3d3;
+  padding: 4px;
+  width: 98%;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+.hidden{
+  display: none;
+}
+
+/* .remove-item {
+  background-image: url(../assets/icon-disk.svg);
+} */
 </style>
